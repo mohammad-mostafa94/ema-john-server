@@ -77,7 +77,7 @@ async function run() {
     run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('genius mechanics server is started!');
+    res.send('ema john server is started!');
 })
 
 app.listen(port, () => {
