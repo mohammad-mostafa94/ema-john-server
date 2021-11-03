@@ -40,7 +40,6 @@ async function run() {
             else{
                 products = await cursor.toArray();
             }
-
             res.send(
                 {
                     count, 
@@ -57,16 +56,29 @@ async function run() {
             const products = await productsCollection.find(query).toArray();
             res.json(products);
             // res.json("hit the projects");
-        })
-
+        });
 
         // GET API for find multiple data.
         app.get("/orders", async (req,res)=>{
-            const cursor =  ordersCollection.find({});
+            let query = {};
+            const email = req.query.Email;
+            console.log("Email",email);
+            if (email) {
+                query = {email :email}
+                console.log(query);
+            }
+            const cursor =  ordersCollection.find(query);
             const orders = await cursor.toArray();
             res.send(orders);
         })
 
+        // Add Orders API
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            order.createdAt = new Date();
+            const result = await ordersCollection.insertOne(order);
+            res.json(result);
+        });
 
         }
     finally {
