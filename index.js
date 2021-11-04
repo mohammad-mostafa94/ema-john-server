@@ -3,7 +3,16 @@ const { MongoClient } = require('mongodb');
 const cors = require("cors");
 const ObjectId = require("mongodb").ObjectId;
 require('dotenv').config()
+
 const bodyParser = require('body-parser');
+var admin = require("firebase-admin");
+
+var serviceAccount = require('./ema-john-simple-auth-b0d08-firebase-adminsdk-8qorz-2571bdb289.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
 
 
 const port = process.env.PORT || 5000;
@@ -18,6 +27,19 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+async function verifyToken(req,res,next){
+    if (req.headers?.authorization?.startsWith("Bearer ")) {   
+        const idToken = req.headers.authorization.split("Bearer ")[1];   
+        
+        try {
+            const decoderUser = await admin.auth().verifyIdToken(idToken);
+            req.decoderUserEmail = decoderUser.email;
+        } catch (error) {
+            
+        }
+    }
+    next();
+}
 
 async function run() {
     try {
@@ -59,18 +81,20 @@ async function run() {
         });
 
         // GET API for find multiple data.
-        app.get("/orders", async (req,res)=>{
-            let query = {};
+        app.get("/orders", verifyToken, async (req,res)=>{
             const email = req.query.Email;
-            console.log("Email",email);
-            if (email) {
-                query = {email :email}
-                console.log(query);
+            console.log(email);
+            if (req.decoderUserEmail === email) {
+                const  query = {email :email}
+                const cursor =  ordersCollection.find(query);
+                const orders = await cursor.toArray();
+                res.send(orders);
             }
-            const cursor =  ordersCollection.find(query);
-            const orders = await cursor.toArray();
-            res.send(orders);
-        })
+            else{
+                res.status(401).json({message:"User not authorized"});
+            }
+            
+        });
 
         // Add Orders API
         app.post('/orders', async (req, res) => {

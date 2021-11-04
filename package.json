@@ -18,6 +18,7 @@
     "end-of-stream": "^1.4.4",
     "express": "^4.17.1",
     "fill-range": "^7.0.1",
+    "firebase-admin": "^10.0.0",
     "glob-parent": "^5.1.2",
     "http-errors": "^1.7.2",
     "iconv-lite": "^0.4.24",
