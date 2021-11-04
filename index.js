@@ -85,7 +85,7 @@ async function run() {
             const email = req.query.Email;
             console.log(email);
             if (req.decoderUserEmail === email) {
-                const  query = {email :email}
+                const  query = {email :email};
                 const cursor =  ordersCollection.find(query);
                 const orders = await cursor.toArray();
                 res.send(orders);
@@ -103,7 +103,6 @@ async function run() {
             const result = await ordersCollection.insertOne(order);
             res.json(result);
         });
-
         }
     finally {
     // await client.close();
